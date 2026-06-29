@@ -42,31 +42,31 @@ export default function Cabinet() {
       setMessages(m => [...m, aiMsg]);
     if (data.reply) {
       setSpeaking(true);
-      try {
-        const ttsResp = await fetch('/api/tts', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: data.reply })
-        });
-        const ttsData = await ttsResp.json();
-        if (ttsData.audio) {
-          const audio = new Audio('data:audio/mp3;base64,' + ttsData.audio);
-          audio.onended = () => setSpeaking(false);
-          audio.play();
-        } else { setSpeaking(false); }
-      } catch { setSpeaking(false); }
-    }
-
-      // Озвучуємо відповідь
-      if (data.reply && 'speechSynthesis' in window) {
-        const utt = new SpeechSynthesisUtterance(data.reply);
-        utt.lang = 'uk-UA';
-        utt.rate = 1.1;
-        utt.onstart = () => setSpeaking(true);
-        utt.onend = () => setSpeaking(false);
-        window.speechSynthesis.speak(utt);
+      const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+      if (!isMobile && 'speechSynthesis' in window) {
+        const speak = () => {
+          const voices = window.speechSynthesis.getVoices();
+          const ukVoice = voices.find(v => v.name && v.name.includes('Daryna')) ||
+                          voices.find(v => v.lang === 'uk-UA') ||
+                          voices.find(v => v.lang && v.lang.startsWith('uk'));
+          const utt = new SpeechSynthesisUtterance(data.reply);
+          utt.lang = 'uk-UA'; utt.rate = 1.0;
+          if (ukVoice) utt.voice = ukVoice;
+          utt.onend = () => setSpeaking(false);
+          window.speechSynthesis.speak(utt);
+        };
+        if (window.speechSynthesis.getVoices().length > 0) speak();
+        else window.speechSynthesis.onvoiceschanged = speak;
+      } else {
+        try {
+          const tr = await fetch('/api/tts', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({text:data.reply}) });
+          const td = await tr.json();
+          if (td.audio) { const a = new Audio('data:audio/mp3;base64,'+td.audio); a.onended=()=>setSpeaking(false); a.play(); }
+          else setSpeaking(false);
+        } catch { setSpeaking(false); }
       }
-    } catch(e) {
+    }
+  } catch(e) {
       setMessages(m => [...m, { role: 'assistant', text: 'Помилка: ' + e.message, ai: 'system' }]);
     }
     setLoading(false);
