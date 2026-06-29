@@ -41,16 +41,20 @@ export default function Cabinet() {
       const aiMsg = { role: 'assistant', text: data.reply || data.error || 'Помилка', ai: selectedAI };
       setMessages(m => [...m, aiMsg]);
     if (data.reply) {
-      if (typeof responsiveVoice !== 'undefined') {
-        setSpeaking(true);
-        responsiveVoice.speak(data.reply, 'Ukrainian Female', { rate: 1.0, onend: () => setSpeaking(false) });
-      } else if ('speechSynthesis' in window) {
-        const utt = new SpeechSynthesisUtterance(data.reply);
-        utt.lang = 'uk-UA'; utt.rate = 1.0;
-        utt.onstart = () => setSpeaking(true);
-        utt.onend = () => setSpeaking(false);
-        window.speechSynthesis.speak(utt);
-      }
+      setSpeaking(true);
+      try {
+        const ttsResp = await fetch('/api/tts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: data.reply })
+        });
+        const ttsData = await ttsResp.json();
+        if (ttsData.audio) {
+          const audio = new Audio('data:audio/mp3;base64,' + ttsData.audio);
+          audio.onended = () => setSpeaking(false);
+          audio.play();
+        } else { setSpeaking(false); }
+      } catch { setSpeaking(false); }
     }
 
       // Озвучуємо відповідь
@@ -103,7 +107,6 @@ export default function Cabinet() {
   return (
     <>
       <Head>
-      <script src="https://code.responsivevoice.org/responsivevoice.js?key=FREE"></script>
         <title>Кабінет діловодця | САБ 2АДн</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#1a237e" />
