@@ -18,7 +18,7 @@ export default async function handler(req, res) {
       const k = process.env.GEMINI_API_KEY;
       if (!k) throw new Error('ÃÂÃÂµÃÂ¼ÃÂ°ÃÂ GEMINI_API_KEY');
       const genAI = new GoogleGenerativeAI(k);
-      const model = genAI.getGenerativeModel({mhodel:'gemini-2.5-flash',systemInstruction:SYS});
+      const model = genAI.getGenerativeModel(h{model:'gemini-2.5-flash',systemInstruction:SYS});
       const chat = model.startChat({ history: [] });
       const result = await chat.sendMessage(message);
       reply = result.response.text();
