@@ -3,7 +3,7 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
   const { message, ai, history = [] } = req.body;
   if (!message) return res.status(400).json({ error: 'No message' });
-  const SYS = 'Ty AI-kabinet dilovodtsya SAB 2ADn. Dopomagayesh vesty oblik osobovogo skladu, vidpustok, boyovogo cherguvannya. Vidpoviday korotko ukrayinskoyu.';
+  const SYS = 'AI-kabinet dilovodtsya SAB 2ADn. Dopomagay vesty oblik. Vidpoviday korotko ukrayinskoyu.';
   try {
     let reply = '';
     if (ai === 'claude') {
