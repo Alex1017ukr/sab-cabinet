@@ -8,7 +8,7 @@ export default async function handler(req, res) {
     let reply = '';
     if (ai === 'claude') {
       const k = process.env.ANTHROPIC_API_KEY;
-      if (!k) throw new Error('ÃÂÃÂµÃÂ¼ÃÂ°ÃÂ ANTHROPIC_API_KEY');
+      if (!k) throw new Error('ÃÂÃÂµÃÂ¼ÃÂ°ÃÂ ANTHROPIC_API_KEY');h
       const m = history.filter(x=>x.role!=='system').map(x=>({role:x.role==='user'?'user':'assistant',content:x.text}));
       m.push({role:'user',content:message});
       const r = await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'x-api-key':k,'anthropic-version':'2023-06-01','content-type':'application/json'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:1024,system:SYS,messages:m})});
@@ -18,7 +18,7 @@ export default async function handler(req, res) {
       const k = process.env.GEMINI_API_KEY;
       if (!k) throw new Error('ÃÂÃÂµÃÂ¼ÃÂ°ÃÂ GEMINI_API_KEY');
       const genAI = new GoogleGenerativeAI(k);
-      const model = genAI.getGenerativeModel({model:'gemini-pro',systemInstruction:SYS});
+      const model = genAI.getGenerativeModel({model:'gemini-2.0-flash',systemInstruction:SYS});
       const chat = model.startChat({ history: [] });
       const result = await chat.sendMessage(message);
       reply = result.response.text();
